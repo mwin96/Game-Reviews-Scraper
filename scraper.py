@@ -1,13 +1,16 @@
 from datetime import datetime,timedelta
 from bs4 import BeautifulSoup
 import requests
-import heapq
 import re
 
 url = 'https://noisypixel.net/review/' 
 url2 = 'https://store.steampowered.com/explore/new/' 
 url3 = 'https://www.destructoid.com/products-index.phtml?filt=reviews&date_s=desc&category='
-
+urlDict = {
+    'noisypixel': url
+    'steam':url2
+    'destructoid':url3
+}
 def grabLinks(currUrl):
     '''Returns a set of game review URL's.''' 
 
@@ -66,7 +69,7 @@ def grabSteamReviews():
     for a in urlSet:
         if 'app' in a: #'app' is the notation steam uses to link to an application  
 
-            tmpReviews = {} #Store info for each review in dictionary 
+            
             
             reviewUrl = requests.get(a)
             reviewData = reviewUrl.text
@@ -84,7 +87,6 @@ def grabSteamReviews():
                 appDev = reviewSoup.find('div',attrs= {'class':'summary column', 'id':'developers_list'}).text
                 releasedDate = releasedDate.date().strftime('%B %d, %Y')
 
-
                 scoreToNum = {           #Conversions, used for sorting steam reviews
                     'Overwhelmingly Positive': 10,
                     'Very Positive': 9,
@@ -96,7 +98,7 @@ def grabSteamReviews():
                     'Very Negative': 3,
                     'OverWhelmingly Negative': 2
                 }
-            
+                tmpReviews = {} #Store info for each review in dictionary 
                 tmpReviews['Link:'] = a
                 tmpReviews['Title:'] = appName
                 tmpReviews['Developer:'] = appDev.strip()
@@ -120,6 +122,8 @@ def grabSteamReviews():
                 
 def grabDestructoidReviews():
     '''Pulls back reviews from Destructoid'''
+   
+
     for a in urlSet:
         if isinstance(a,str) and 'stories/review' in a:
             fullURL = 'https://www.destructoid.com/' + a        
@@ -128,39 +132,40 @@ def grabDestructoidReviews():
             reviewData = reviewUrl.text
             reviewSoup = BeautifulSoup(reviewData,'html.parser')
 
-            developer = reviewSoup.find(text=re.compile('Developer:'))
-            publisher = reviewSoup.find(text=re.compile('Publisher:'))
-            released = reviewSoup.find(text=re.compile('Released:'))
-            if released:
-                releaseDate = released.split(' ')[1:4] #Destructoid groups dates and consoles, I need to split them up
-                cleanUp = released.replace('(','').replace(')','')
-                print(cleanUp)
-                # for items in released:
-                #     if 
-                # if releaseDate: 
-                #     print(releaseDate)
-                # print(developer,publisher,released)
-        # for revws in reviewSoup.find_all('strong'): #Important info on this site happens to be identified with <strong> tags
-        #     print(revws)
-            # print(test)
-            # tmpReviews = {} #Store info for each review in dictionary 
-            # print('w')
-            # # reviewUrl = requests.get(a)
-            # reviewData = reviewUrl.text
-            # reviewSoup = BeautifulSoup(reviewData,'html.parser')
-            # print(test)
-            # tmpReviews['Review Link:'] = a
+            for revws in reviewSoup.find_all('p'): 
+                if 'Released' in revws.text and 'Developer' in revws.text:
+                    gameName = revws.text[:revws.text.index('(')]
+                    reviewedOn = revws.text[revws.text.index('('):revws.text.index('Developer')]
+                    developer = revws.text[revws.text.index('Developer')+11:revws.text.index('Publisher')]
+                    released = revws.text[revws.text.index('Released')+10:revws.text.index('MSRP')]
+                    score = reviewSoup.find('div', class_ = 'gscore')
+                    if developer and released and score:
+                        try:
+                            releasedDate = datetime.strptime(released[:released.index('(')-1],'%B %d, %Y') #Date time calculations
+                        except ValueError:
+                            pass
+                        try:
+                            releasedDate = datetime.strptime(released,'%B %d, %Y')
+                        except ValueError:
+                            break
 
-            # for revws in reviewSoup.find_all('strong'): #Important info on this site happens to be identified with <strong> tags
-            
+                        oneWeek = datetime.today() - timedelta(days=7)
+                        if releasedDate > oneWeek:   
+                            tmpReviews = {} #Store info for each review in dictionary 
+                            tmpReviews['Link:'] = fullURL
+                            tmpReviews['Title:'] = gameName
+                            tmpReviews['Developer'] = developer
+                            tmpReviews['Release Date:'] = releasedDate.date().strftime('%B %d, %Y')
+                            tmpReviews['Score:'] = score.text
+                            tmpReviews['floatScore:'] = float(score.text)
+                            tmpReviews['Consoles I own:'] = reviewedOn.replace('(','').replace(')','').replace('[reviewed]','')
+                            greatReviews.append(tmpReviews)
 
 
 # grabSteamReviews()
 # grabNoisyPixelReviews()
 grabDestructoidReviews()
-
-
-
+# print(greatReviews)
 def printReviews(dic):
     '''Prints out games and scores. '''
 
@@ -175,3 +180,10 @@ def printReviews(dic):
 if len(greatReviews) > 0:
     sortedReviews = sorted(greatReviews, key = lambda k: k['floatScore:']) #Sort by float value
     printReviews(sortedReviews)
+
+# #Todo:
+#     #Finish destructoid (release date one week, appending to actual thing) X
+
+    #Noisy pixel time one week thing as well 
+
+    #Print each 3/differentiate them somehow
