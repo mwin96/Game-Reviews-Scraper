@@ -6,11 +6,16 @@ import re
 url = 'https://noisypixel.net/review/' 
 url2 = 'https://store.steampowered.com/explore/new/' 
 url3 = 'https://www.destructoid.com/products-index.phtml?filt=reviews&date_s=desc&category='
+
 urlDict = {
-    'noisypixel': url
-    'steam':url2
+    'noisypixel': url,
+    'steam':url2,
     'destructoid':url3
 }
+
+ownedConsoles = {'PC','PS4','Switch','Mobile','iOS'}
+
+
 def grabLinks(currUrl):
     '''Returns a set of game review URL's.''' 
 
@@ -23,9 +28,6 @@ def grabLinks(currUrl):
     linkSet = set(urlList) #Set to remove any duplicates
     return linkSet
 
-urlSet = grabLinks(url3)
-greatReviews = []
-ownedConsoles = {'PC','PS4','Switch','Mobile','iOS'}
 
 def grabNoisyPixelReviews():
     '''Pulls back recently released Noisy Pixel reviews.'''
@@ -42,25 +44,27 @@ def grabNoisyPixelReviews():
             tmpReviews['Review Link:'] = a
 
             for revws in reviewSoup.find_all('strong'): #Important info on this site happens to be identified with <strong> tags
-                
+           
                 if '/10' in revws.text:
-                    tmpReviews['Score:'] = revws.text
+                    tmpReviews['Score: '] = revws.text
                     upTo = revws.text.index('/')        #We want to store the float value of the score for sorting purposes
-                    tmpReviews['floatScore:'] = float(revws.text[:upTo])
+                    tmpReviews['floatScore: '] = float(revws.text[:upTo])
                 else:
-                    tmpReviews[revws.text] = revws.next_sibling
+                    tmpReviews[revws.text] = revws.next_sibling.lstrip()
             splitTags = a.replace('/','').split('-')
-            tmpReviews['Consoles I own:'] =''
+            tmpReviews['Consoles I own: '] =''
             for console in ownedConsoles:
-                # cons = console.replace('/','') #Sometimes a / can be attached to the tag
-                # print(cons)
-                if console in splitTags:
-                    if tmpReviews['Consoles I own:'] != '':   #If something already exists, add a comma and space
-                        tmpReviews['Consoles I own:'] += ', ' + console
+                if console.lower() in splitTags:
+                    if tmpReviews['Consoles I own: '] != '':   #If something already exists, add a comma and space
+                        tmpReviews['Consoles I own: '] += ', ' + console
                     else:
-                        tmpReviews['Consoles I own:'] += console
-            # print(test)
-            greatReviews.append(tmpReviews)
+                        tmpReviews['Consoles I own: '] += console
+
+            tempSplit = tmpReviews['Release Date:'].split()
+            releasedDate = datetime.strptime(''.join(tempSplit),'%B%d,%Y')
+            oneWeek = datetime.today() - timedelta(days=7)                 
+            if releasedDate > oneWeek:
+                greatReviews.append(tmpReviews)
 
 def grabSteamReviews():
     '''Pulls back game reviews from Steam new releases page.'''
@@ -69,8 +73,6 @@ def grabSteamReviews():
     for a in urlSet:
         if 'app' in a: #'app' is the notation steam uses to link to an application  
 
-            
-            
             reviewUrl = requests.get(a)
             reviewData = reviewUrl.text
             reviewSoup = BeautifulSoup(reviewData,'html.parser')
@@ -98,32 +100,25 @@ def grabSteamReviews():
                     'Very Negative': 3,
                     'OverWhelmingly Negative': 2
                 }
+
                 tmpReviews = {} #Store info for each review in dictionary 
-                tmpReviews['Link:'] = a
-                tmpReviews['Title:'] = appName
-                tmpReviews['Developer:'] = appDev.strip()
-                # print('x', appDev.strip())
-                tmpReviews['Release Date:'] = releasedDate
+                tmpReviews['Link: '] = a
+                tmpReviews['Title: '] = appName
+                tmpReviews['Developer: '] = appDev.strip()  
+                tmpReviews['Release Date: '] = releasedDate
                 if not scoreToNum.get(appScore):    #Situation where not enough user reviews to generate a score
-                    tmpReviews['Score:'] = 'None available yet'
-                    tmpReviews['floatScore:'] = 0
+                    tmpReviews['Score: '] = 'None available yet'
+                    tmpReviews['floatScore: '] = 0
                 else:
-                    tmpReviews['Score:'] = appScore
-                    tmpReviews['floatScore:'] = scoreToNum.get(appScore)
-                tmpReviews['Consoles I own:'] = 'PC' #Hardcoding pc since this is Steam
-
-                # print(appName)
-
-                # print(appName)
-                # print(releasedDate)
-                # print(appScore)
+                    tmpReviews['Score: '] = appScore
+                    tmpReviews['floatScore: '] = scoreToNum.get(appScore)
+                tmpReviews['Consoles I own: '] = 'PC' #Hardcoding pc since this is Steam
 
                 greatReviews.append(tmpReviews)
                 
 def grabDestructoidReviews():
     '''Pulls back reviews from Destructoid'''
    
-
     for a in urlSet:
         if isinstance(a,str) and 'stories/review' in a:
             fullURL = 'https://www.destructoid.com/' + a        
@@ -152,38 +147,57 @@ def grabDestructoidReviews():
                         oneWeek = datetime.today() - timedelta(days=7)
                         if releasedDate > oneWeek:   
                             tmpReviews = {} #Store info for each review in dictionary 
-                            tmpReviews['Link:'] = fullURL
-                            tmpReviews['Title:'] = gameName
-                            tmpReviews['Developer'] = developer
-                            tmpReviews['Release Date:'] = releasedDate.date().strftime('%B %d, %Y')
-                            tmpReviews['Score:'] = score.text
-                            tmpReviews['floatScore:'] = float(score.text)
-                            tmpReviews['Consoles I own:'] = reviewedOn.replace('(','').replace(')','').replace('[reviewed]','')
+                            tmpReviews['Link: '] = fullURL
+                            tmpReviews['Title: '] = gameName
+                            tmpReviews['Developer: '] = developer
+                            tmpReviews['Release Date: '] = releasedDate.date().strftime('%B %d, %Y')
+                            tmpReviews['Score: '] = score.text
+                            tmpReviews['floatScore: '] = float(score.text)
+
+                            tmpReviews['Consoles I own: '] = ''
+                            consoleList = reviewedOn.replace('(','').replace(')','').replace('[reviewed]','').replace(',','').split(' ')
+                            lowerCaseConsole = set()
+                            for x in consoleList:
+                                lowerCaseConsole.add(x.lower())   #lowercase console names for uniformity 
+
+                            for console in ownedConsoles:
+                                if console.lower() in lowerCaseConsole:
+                                    if tmpReviews['Consoles I own: '] != '':   #If something already exists, add a comma and space
+                                        tmpReviews['Consoles I own: '] += ', ' + console
+                                    else:
+                                        tmpReviews['Consoles I own: '] += console
+
                             greatReviews.append(tmpReviews)
 
-
-# grabSteamReviews()
-# grabNoisyPixelReviews()
-grabDestructoidReviews()
-# print(greatReviews)
 def printReviews(dic):
     '''Prints out games and scores. '''
 
-    for review in dic:
-        currScore = review['Score:']
-        noPrint = {'floatScore:','Publisher:', 'Reviewed On:'} #Valid tags, but not really things that matter to me 
+    sortedReviews = sorted(dic, key = lambda k: k['floatScore: '], reverse=True) #Sort by float value
+    for review in sortedReviews:
+        currScore = review['Score: ']
+        noPrint = {'floatScore: ','Publisher: ', 'Reviewed On: '} #Valid tags, but not really things that matter to me 
         for values in review:
             if values not in noPrint:
                 print(values,review[values])
         print('\n')
 
-if len(greatReviews) > 0:
-    sortedReviews = sorted(greatReviews, key = lambda k: k['floatScore:']) #Sort by float value
-    printReviews(sortedReviews)
-
-# #Todo:
-#     #Finish destructoid (release date one week, appending to actual thing) X
-
-    #Noisy pixel time one week thing as well 
-
-    #Print each 3/differentiate them somehow
+for urls in urlDict:
+    urlSet = grabLinks(urlDict[urls])
+    if urls == 'noisypixel':
+        greatReviews = []
+        grabNoisyPixelReviews()
+        if len(greatReviews) > 0:
+            print('-----Noisy Pixel Reviews-----\n')
+            printReviews(greatReviews)
+    if urls == 'destructoid':
+        greatReviews = []
+        grabDestructoidReviews()
+        if len(greatReviews) > 0:
+            print('-----Destructoid Reviews-----\n')
+            printReviews(greatReviews)
+    if urls == 'steam':
+        greatReviews = []
+        grabSteamReviews()
+        if len(greatReviews) > 0:
+            print('-----Steam Reviews-----\n')
+            printReviews(greatReviews)
