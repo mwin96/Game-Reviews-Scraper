@@ -1,0 +1,22 @@
+/* html {
+    background-color: blue;
+  }
+  
+  body {
+    background-color: red;
+  } */
+
+  .great{
+    color: #64dd17;
+    font-weight:bold;
+  }
+
+  .good{
+    color: #ffc400;
+    font-weight:bold;
+  }
+
+  .bad{
+    color: #e53935;
+    font-weight:bold;
+  }
