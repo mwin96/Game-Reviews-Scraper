@@ -5,16 +5,16 @@
 <html>
    <head>
       <title>Game Review Send Email</title>
-      <link rel="stylesheet" href="{% static 'style.css' %}" />
 
       {% block css %}
       <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.1/css/materialize.min.css" integrity="sha256-qj3p6P1fJIV+Ndv7RW1ovZI2UhOuboj9GcODzcNFIN8=" crossorigin="anonymous" />
       {% endblock css %}
+     <link rel="stylesheet" href="{% static 'style.css' %}" />
    </head>
    <body>
-      <center>
-         <h1 class = 'alert alert-success'>Game Review Scraper</h1>
+      {% comment %} <center> {% endcomment %}
+         {% comment %} <h1 class = 'alert alert-success'>Game Review Scraper</h1>
          <h3 class="p-3 mb-2 bg-primary text-white" style = 'font-size: 50px;'>Email Form
          </h3>
          <form method="POST">
@@ -89,7 +89,12 @@
                  {% endfor %}
              </tbody>
          </table>
-     </div>
-     
+     </div> {% endcomment %}
+    <div class="container">
+        {% comment %} <div class = "col s1"> {% endcomment %}
+        {% load django_tables2 %}
+        {% render_table table %}
+        {% comment %} </div> {% endcomment %}
+    </div>
    </body>
 </html>

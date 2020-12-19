@@ -11,7 +11,7 @@ from .models import Reviews
 # from celery.task import periodic_task
 
 
-def run_continuously(self, interval=45):
+def run_continuously(self, interval=86400):
     """Continuously run, while executing pending jobs at each elapsed
     time interval.
     @return cease_continuous_run: threading.Event which can be set to
@@ -150,7 +150,7 @@ def scraper():
                     if not scoreToNum.get(appScore):    #Situation where not enough user reviews to generate a score
                         tmpReviews['Score: '] = 0
                         tmpReviews['floatScore: '] = 0
-                        tmpReviews['SteamReview: '] = 'None Available Yet'
+                        tmpReviews['SteamReview: '] = 'N/A'
                     else:
                         tmpReviews['Score: '] = scoreToNum.get(appScore)
                         tmpReviews['floatScore: '] = scoreToNum.get(appScore)

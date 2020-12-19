@@ -9,8 +9,20 @@ from bs4 import BeautifulSoup
 # from celery.task import periodic_task
 import requests
 from .models import Reviews
+import django_tables2 as tables
+from .models import ReviewsTable
 
 # Create your views here.
+class TableView(tables.SingleTableView):
+    model = Reviews
+    # table_class = ReviewsTable
+    # queryset = Reviews.objects.all()
+    table_class = ReviewsTable
+    # queryset = {}
+    # for i in tmpSet:
+    template_name = 'subscribe/index.html'
+
+
 
 def subscribe(request):
     tmpStr = ''
