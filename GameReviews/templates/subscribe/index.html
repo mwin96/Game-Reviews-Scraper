@@ -1,10 +1,9 @@
 {% load static %}
 
-
 <!DOCTYPE html>
 <html>
    <head>
-      <title>Game Review Send Email</title>
+      <title>Weekly Game Reviews</title>
 
       {% block css %}
       <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -13,8 +12,29 @@
      <link rel="stylesheet" href="{% static 'style.css' %}" />
    </head>
    <body>
-      {% comment %} <center> {% endcomment %}
-         {% comment %} <h1 class = 'alert alert-success'>Game Review Scraper</h1>
+    <nav>
+        <div class="nav-wrapper cyan">
+       <a class="brand-logo center" >  weekly game reviews for {% now "n/d/y" %}</a> 
+        </div>
+    </nav>
+    
+    {% load django_tables2 %}  
+    {% load crispy_forms_tags %}
+    <div class="container">
+        <hr/>
+            <form action="" method="get" class="form-inline">
+                {% crispy filter.form filter.form.helper  %}
+                {% comment %} {{ filter.form.as_p }} {% endcomment %}
+                <input class = 'btn-small cyan' type="submit" value="Filter"/>
+            </form>
+        <div>
+        </div>
+        {% render_table table %}
+    </div>
+
+        {% comment %}''' Currently not in use, was used for email subscription testing ''''  {% endcomment %}
+        {% comment %} <center> 
+         {% comment= <h1 class = 'alert alert-success'>Game Review Scraper</h1>
          <h3 class="p-3 mb-2 bg-primary text-white" style = 'font-size: 50px;'>Email Form
          </h3>
          <form method="POST">
@@ -30,71 +50,8 @@
                <input type="submit" name="Subscribe" class = 'btn btn-primary btn-lg'>
             </div>
          </form>
-         <!-- <p>
-            {% for reviews in link %}
-            {{ review.title}}
-            {{ review.developer }}
-            {% endfor %}
-         </p> -->
       </center>
-      <div class="row">
-         <table>
-             <tbody>
-                 {% for review in link %}
-                 <tr>
-                     <td>
-                         <a href="{{ review.link }}">{{ review.title }}</a>
-                     </td>
-                     <td>
-                         <p>
-                            {% if review.website == 'Steam' %} 
-                                {% if review.steamReview == "Very Positive" or review.steamReview == "Overwhelmingly Positive" %}
-                                    <div class="score great"> 
-                                {% elif review.steamReview == "Mostly Positive" or review.steamReview == "Positive" %}
-                                    <div class ="score good">
-                                {% else %}
-                                    <div class = "score bad">
-                                {% endif %}
-                                {{ review.steamReview }}
-                            {% else %}
-                                {% if review.score >=  8 %} 
-                                    <div class="score great"> 
-                                {% elif review.score <= 8 and review.score >= 7 %}
-                                    <div class="score good"> 
-                                {% else %}
-                                    <div class="score bad "> 
-                                {% endif %}
-                                {{ review.score }}
-                           {% endif %}
+    {% endcomment %}
 
-                           </div>
-                         </p>
-                     </td>
-                     <td>
-                         <p>
-                             Consoles: {{ review.consoles }}
-                         </p>
-                     </td>
-                     <td>
-                         <p>
-                             Released: {{ review.releaseDate }}
-                         </p>
-                     </td>
-                     <td>
-                        <p>
-                            Developer: {{ review.developer }}
-                        </p>
-                    </td>
-                 </tr>
-                 {% endfor %}
-             </tbody>
-         </table>
-     </div> {% endcomment %}
-    <div class="container">
-        {% comment %} <div class = "col s1"> {% endcomment %}
-        {% load django_tables2 %}
-        {% render_table table %}
-        {% comment %} </div> {% endcomment %}
-    </div>
    </body>
 </html>

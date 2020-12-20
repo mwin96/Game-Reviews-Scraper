@@ -252,11 +252,8 @@ def scraper():
         urlSet = grabLinks(urlDict[urls])
         if urls == 'noisypixel':
             greatReviews = []
-            # grabNoisyPixelReviews()
-            # if len(greatReviews) > 0:
-            #     anotherTmpSTRING += '-----Noisy Pixel Reviews-----\n'
-            #     anotherTmpSTRING += printReviews(greatReviews)
-            #     anotherTmpSTRING += '\n'
+            grabNoisyPixelReviews()
+
         if urls == 'destructoid':
             grabDestructoidReviews()
         
