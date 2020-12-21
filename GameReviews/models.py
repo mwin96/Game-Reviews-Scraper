@@ -5,12 +5,11 @@ from django.db import models
 # models.py
 
 class Reviews(models.Model):
-    
-    website = models.CharField(max_length=200, default="")
-    link = models.CharField(max_length=2083, default="")
-    title = models.CharField(max_length=200, default = "")
-    developer = models.CharField(max_length=200, default = "")
-    releaseDate = models.DateField(max_length=200)
-    score = models.FloatField(max_length=200)
-    steamReview = models.CharField(max_length=200, default = "")
-    consoles = models.CharField(max_length=200)
+    website = models.CharField(max_length=64, default="")
+    link = models.CharField(max_length=256, default="")
+    title = models.CharField(max_length=64, default = "")
+    developer = models.CharField(max_length=256, default = "")
+    releaseDate = models.DateField(max_length=256, default = "")
+    score = models.FloatField(max_length=64, default = 0)
+    steamReview = models.CharField(max_length=256, default = "")
+    consoles = models.CharField(max_length=256, default = "")

@@ -11,7 +11,7 @@ from .models import Reviews
 # from celery.task import periodic_task
 
 
-def run_continuously(self, interval=86400):
+def run_continuously(self, interval=1000):
     """Continuously run, while executing pending jobs at each elapsed
     time interval.
     @return cease_continuous_run: threading.Event which can be set to
@@ -247,12 +247,11 @@ def scraper():
                 break
         return print('Finished')
 
-    anotherTmpSTRING = ''
+    greatReviews = []
     for urls in urlDict:
         urlSet = grabLinks(urlDict[urls])
-        if urls == 'noisypixel':
-            greatReviews = []
-            grabNoisyPixelReviews()
+        # if urls == 'noisypixel':
+            # grabNoisyPixelReviews()
 
         if urls == 'destructoid':
             grabDestructoidReviews()

@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from myproject.settings import EMAIL_HOST_USER
+from settings import EMAIL_HOST_USER
 from . import forms
 from django.core.mail import send_mail
 import requests
